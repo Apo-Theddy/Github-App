@@ -16,7 +16,6 @@ dependencies:
   json_annotation: ^4.9.0
   flutter_bloc: ^9.1.1
   go_router: ^16.3.0
-  get: ^4.7.2
   dartz:
   equatable: ^2.0.7
   dio: ^5.9.0
