@@ -8,6 +8,7 @@ import 'package:github_app/features/repo/presentation/bloc/favorite_repo_event.d
 import 'package:github_app/features/repo/presentation/bloc/favorite_repo_state.dart';
 import 'package:github_app/shared/utils/language_color.dart';
 import 'package:github_app/shared/widgets/back_button_widget.dart';
+import 'package:github_app/shared/widgets/cached_network_image_widget.dart';
 
 class RepoDetailPage extends StatelessWidget {
   final Repo repo;
@@ -43,23 +44,12 @@ class RepoDetailPage extends StatelessWidget {
                 const SizedBox(height: 24),
                 Row(
                   children: [
-                    Hero(
-                      tag: 'avatar_${repo.id}',
-                      child: ClipOval(
-                        child: CachedNetworkImage(
-                          imageUrl: repo.owner.avatarUrl,
-                          width: 56,
-                          height: 56,
-                          fit: BoxFit.cover,
-                          placeholder: (_, __) => Container(
-                            color: Colors.grey.shade200,
-                            child: const Icon(Icons.person, size: 32),
-                          ),
-                          errorWidget: (_, __, ___) => Container(
-                            color: Colors.grey.shade200,
-                            child: const Icon(Icons.person, size: 32),
-                          ),
-                        ),
+                    ClipOval(
+                      child: CachedNetworkImageWidget(
+                        imageUrl: repo.owner.avatarUrl,
+                        width: 56,
+                        height: 56,
+                        fit: BoxFit.cover,
                       ),
                     ),
                     const SizedBox(width: 16),
