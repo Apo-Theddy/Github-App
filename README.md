@@ -1,6 +1,6 @@
 # Github App
 
-## que es esto
+f## que es esto
 
 una app para manejar tus repos de github desde el celular sin complicarte la vida ni abrir el navegador
 
@@ -39,6 +39,8 @@ una app para manejar tus repos de github desde el celular sin complicarte la vid
 ### requisitos
 
 - flutter instalado (o fvm para manejar versiones)
+- version de flutter usada: 3.35.4
+- version de dart 3.9.2
 - emulador o celular fisico
 - conexion a internet para consumir la api
 - apk disponible en la carpeta apk/ para instalar directo en android
