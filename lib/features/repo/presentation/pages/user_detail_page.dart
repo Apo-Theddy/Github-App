@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:github_app/features/repo/data/models/repo_model.dart';
 import 'package:github_app/features/repo/presentation/pages/profile_user_card.dart';
+import 'package:github_app/features/user/data/models/user_model.dart';
 import 'package:github_app/shared/widgets/back_button_widget.dart';
 
 class UserDetailPage extends StatefulWidget {
   final Repo repo;
-  const UserDetailPage({super.key, required this.repo});
+  final User user;
+  final String markdown;
+  const UserDetailPage({
+    super.key,
+    required this.repo,
+    required this.user,
+    required this.markdown,
+  });
 
   @override
   State<UserDetailPage> createState() => _UserDetailPageState();
@@ -36,7 +44,11 @@ class _UserDetailPageState extends State<UserDetailPage> {
                   ),
                 ],
               ),
-              ProfileUserCard(owner: widget.repo.owner),
+              ProfileUserCard(
+                owner: widget.repo.owner,
+                user: widget.user,
+                markdown: widget.markdown,
+              ),
             ],
           ),
         ),
