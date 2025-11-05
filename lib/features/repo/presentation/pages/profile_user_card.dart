@@ -9,6 +9,7 @@ import 'package:github_app/core/color/app_color.dart';
 import 'package:github_app/features/repo/data/models/owner_model.dart';
 import 'package:github_app/features/repo/di/container.dart';
 import 'package:github_app/features/user/data/models/user_model.dart';
+import 'package:github_app/shared/widgets/cached_network_image_widget.dart';
 
 class ProfileUserCard extends StatefulWidget {
   const ProfileUserCard({super.key, required this.owner});
@@ -182,15 +183,9 @@ class _ProfileUserCardState extends State<ProfileUserCard> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(100),
-                    child: CachedNetworkImage(
+                    child: CachedNetworkImageWidget(
                       imageUrl: widget.owner.avatarUrl,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) =>
-                          Container(color: Colors.grey.shade800),
-                      errorWidget: (context, url, error) => Container(
-                        color: Colors.grey.shade800,
-                        child: const Icon(Icons.error, color: Colors.redAccent),
-                      ),
                     ),
                   ),
                 ),
