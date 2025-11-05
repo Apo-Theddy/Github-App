@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:github_app/core/color/app_color.dart';
 import 'package:github_app/features/repo/data/models/repo_model.dart';
 import 'package:github_app/features/repo/di/container.dart';
