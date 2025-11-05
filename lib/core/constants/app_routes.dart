@@ -43,7 +43,7 @@ class AppRoutes {
           throw ArgumentError('Requires a Repo object for this route');
         }
 
-        return _buildCupertinoPage(
+        return _buildFadePage(
           state: state,
           child: UserDetailPage(repo: repo),
         );
@@ -57,7 +57,7 @@ class AppRoutes {
         if (repo == null) {
           throw ArgumentError('Requires a Repo object for this route');
         }
-        return _buildCupertinoPage(
+        return _buildFadePage(
           state: state,
           child: RepoDetailPage(repo: repo),
         );
@@ -67,11 +67,11 @@ class AppRoutes {
       path: favoriteRepos,
       name: 'favoriteRepos',
       pageBuilder: (context, state) =>
-          _buildCupertinoPage(state: state, child: const FavoriteReposPage()),
+          _buildFadePage(state: state, child: const FavoriteReposPage()),
     ),
   ];
 
-  static CustomTransitionPage _buildCupertinoPage({
+  static CustomTransitionPage _buildFadePage({
     required GoRouterState state,
     required Widget child,
   }) {
@@ -80,22 +80,17 @@ class AppRoutes {
       child: child,
       transitionDuration: _transitionDuration,
       reverseTransitionDuration: _transitionDuration,
-      transitionsBuilder: _cupertinoTransitionBuilder,
+      transitionsBuilder: _fadeTransitionBuilder,
     );
   }
 
-  static Widget _cupertinoTransitionBuilder(
+  static Widget _fadeTransitionBuilder(
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return CupertinoPageTransition(
-      primaryRouteAnimation: animation,
-      secondaryRouteAnimation: secondaryAnimation,
-      linearTransition: true,
-      child: child,
-    );
+    return FadeTransition(opacity: animation, child: child);
   }
 }
 
