@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:github_app/core/constants/routes.dart';
+import 'package:github_app/core/constants/app_routes.dart';
 import 'package:github_app/core/theme/app_theme.dart';
 import 'package:github_app/features/repo/data/models/repo_model.dart';
 import 'package:github_app/features/repo/di/container.dart';
@@ -15,73 +15,8 @@ import 'package:github_app/features/repo/presentation/pages/user_detail_page.dar
 import 'package:github_app/home_page.dart';
 import 'package:go_router/go_router.dart';
 
-final router = GoRouter(
-  routes: [
-    GoRoute(path: Routes.home, builder: (context, state) => const HomePage()),
-    GoRoute(
-      path: Routes.userDetail,
-      pageBuilder: (context, state) {
-        final repo = state.extra as Repo;
-        return CustomTransitionPage(
-          key: state.pageKey,
-          child: UserDetailPage(repo: repo),
-          transitionDuration: Duration(milliseconds: 100),
-          reverseTransitionDuration: Duration(milliseconds: 100),
-          transitionsBuilder: (ctx, animation, secAnimation, child) {
-            return CupertinoPageTransition(
-              primaryRouteAnimation: animation,
-              secondaryRouteAnimation: secAnimation,
-              linearTransition: true,
-              child: child,
-            );
-          },
-        );
-      },
-    ),
-    GoRoute(
-      path: Routes.repoDetail,
-      pageBuilder: (context, state) {
-        final repo = state.extra as Repo;
-        return CustomTransitionPage(
-          key: state.pageKey,
-          child: RepoDetailPage(repo: repo),
-          transitionDuration: Duration(milliseconds: 100),
-          reverseTransitionDuration: Duration(milliseconds: 100),
-          transitionsBuilder: (ctx, animation, secAnimation, child) {
-            return CupertinoPageTransition(
-              primaryRouteAnimation: animation,
-              secondaryRouteAnimation: secAnimation,
-              linearTransition: true,
-              child: child,
-            );
-          },
-        );
-      },
-    ),
-    GoRoute(
-      path: Routes.favoriteRepos,
-      pageBuilder: (context, state) {
-        return CustomTransitionPage(
-          key: state.pageKey,
-          child: FavoriteReposPage(),
-          transitionDuration: Duration(milliseconds: 100),
-          reverseTransitionDuration: Duration(milliseconds: 100),
-          transitionsBuilder: (ctx, animation, secAnimation, child) {
-            return CupertinoPageTransition(
-              primaryRouteAnimation: animation,
-              secondaryRouteAnimation: secAnimation,
-              linearTransition: true,
-              child: child,
-            );
-          },
-        );
-      },
-    ),
-  ],
-);
-
 class App extends StatelessWidget {
-  final GoRouter _router = router;
+  final GoRouter _router = AppRoutes.router;
   App({super.key});
 
   @override

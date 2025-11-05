@@ -2,150 +2,202 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:github_app/core/color/app_color.dart';
-import 'package:github_app/core/constants/routes.dart';
+import 'package:github_app/core/constants/app_routes.dart';
 import 'package:github_app/features/repo/data/models/repo_model.dart';
 import 'package:github_app/features/repo/presentation/bloc/favorite_repo_bloc.dart';
 import 'package:github_app/features/repo/presentation/bloc/favorite_repo_event.dart';
 import 'package:github_app/features/repo/presentation/bloc/favorite_repo_state.dart';
+import 'package:github_app/shared/utils/language_color.dart';
 import 'package:go_router/go_router.dart';
 
-class RepoCard extends StatefulWidget {
+class RepoCard extends StatelessWidget {
   final Repo repo;
   final void Function(int id)? onRemoveFavorite;
+
   const RepoCard({super.key, required this.repo, this.onRemoveFavorite});
 
   @override
-  State<RepoCard> createState() => _RepoCardState();
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Card(
+      elevation: 0,
+      color: theme.cardColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+          width: 1,
+        ),
+      ),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => context.goToRepoDetail(repo),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => context.goToUserDetail(repo),
+                    child: Hero(
+                      tag: 'avatar_${repo.id}',
+                      child: ClipOval(
+                        child: CachedNetworkImage(
+                          imageUrl: repo.owner.avatarUrl,
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.cover,
+                          placeholder: (_, __) => Container(
+                            color: Colors.grey.shade200,
+                            child: const Icon(Icons.person, color: Colors.grey),
+                          ),
+                          errorWidget: (_, __, ___) => Container(
+                            color: Colors.grey.shade200,
+                            child: const Icon(Icons.person, color: Colors.grey),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          repo.name,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (repo.owner.login.isNotEmpty)
+                          Text(
+                            repo.owner.login,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  BlocBuilder<FavoriteRepoBloc, FavoriteRepoState>(
+                    builder: (context, state) {
+                      final isFavorite =
+                          state is FavoriteRepoLoadedState &&
+                          state.ids.contains(repo.id);
+
+                      return IconButton(
+                        onPressed: () {
+                          if (isFavorite) {
+                            context.read<FavoriteRepoBloc>().add(
+                              RemoveFavoriteRepoIdEvent(repo.id),
+                            );
+                            onRemoveFavorite?.call(repo.id);
+                          } else {
+                            context.read<FavoriteRepoBloc>().add(
+                              AddFavoriteRepoIdEvent(repo.id),
+                            );
+                          }
+                        },
+                        icon: Icon(
+                          isFavorite ? Icons.star : Icons.star_border,
+                          color: isFavorite ? Colors.amber : null,
+                        ),
+                        splashRadius: 20,
+                      );
+                    },
+                  ),
+                ],
+              ),
+              if (repo.description?.isNotEmpty == true) ...[
+                const SizedBox(height: 12),
+                Text(
+                  repo.description!,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey.shade600,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  _InfoChip(
+                    icon: Icons.star_border,
+                    label: '${repo.stargazersCount}',
+                    color: Colors.amber,
+                  ),
+                  const SizedBox(width: 16),
+                  _InfoChip(
+                    icon: Icons.call_split,
+                    label: '${repo.forksCount}',
+                    color: Colors.grey.shade600,
+                  ),
+                  const Spacer(),
+                  if (repo.language?.isNotEmpty == true)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: getLanguageColor(repo.language!),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        repo.language!,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-class _RepoCardState extends State<RepoCard> {
-  @override
-  void initState() {
-    super.initState();
-  }
+class _InfoChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  const _InfoChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
-    return GestureDetector(
-      onTap: () {
-        context.push(Routes.repoDetail, extra: widget.repo);
-      },
-      child: Container(
-        margin: const EdgeInsetsGeometry.symmetric(vertical: 5),
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          border: BoxBorder.all(color: Color(AppColor.color1), width: 0.5),
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: color),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: color,
+            fontSize: 13,
+          ),
         ),
-
-        child: Column(
-          children: [
-            Row(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    context.push(Routes.userDetail, extra: widget.repo);
-                  },
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(25),
-                    child: CachedNetworkImage(
-                      imageUrl: widget.repo.owner.avatarUrl,
-                      placeholder: (context, url) => CircularProgressIndicator(
-                        color: Color(AppColor.color1),
-                      ),
-                      errorWidget: (context, url, error) => Hero(
-                        tag: 'avatar_${widget.repo.id}',
-                        child: Icon(Icons.account_circle, size: 35),
-                      ),
-                      width: 35,
-                      height: 35,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 10),
-                SizedBox(
-                  width: size.width * 0.5,
-                  child: Text(
-                    widget.repo.name,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                Spacer(),
-                BlocBuilder<FavoriteRepoBloc, FavoriteRepoState>(
-                  builder: (context, state) {
-                    bool isFavorite = false;
-                    if (state is FavoriteRepoLoadedState) {
-                      isFavorite = state.ids.contains(widget.repo.id);
-                    }
-                    return GestureDetector(
-                      onTap: () {
-                        if (isFavorite) {
-                          context.read<FavoriteRepoBloc>().add(
-                            RemoveFavoriteRepoIdEvent(widget.repo.id),
-                          );
-
-                          if (widget.onRemoveFavorite != null) {
-                            widget.onRemoveFavorite!(widget.repo.id);
-                          }
-                        } else {
-                          context.read<FavoriteRepoBloc>().add(
-                            AddFavoriteRepoIdEvent(widget.repo.id),
-                          );
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 15,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Color(AppColor.color1),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Icon(
-                          isFavorite ? Icons.star : Icons.star_border,
-                          color: isFavorite ? Colors.amber : Colors.white,
-                          size: 16,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-            SizedBox(height: 10),
-            Text(
-              widget.repo.description ?? '',
-              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-            ),
-            SizedBox(height: 15),
-            Row(
-              children: [
-                Icon(Icons.star_outline, size: 20, color: Colors.amber),
-                SizedBox(width: 4),
-                Text(
-                  '${widget.repo.stargazersCount}',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                SizedBox(width: 16),
-                Icon(Icons.call_split, size: 20, color: Colors.grey),
-                SizedBox(width: 4),
-                Text(
-                  '${widget.repo.forksCount}',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Spacer(),
-                Text(
-                  widget.repo.language ?? 'Unknown',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[400]),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+      ],
     );
   }
 }

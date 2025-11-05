@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:github_app/core/constants/routes.dart';
+import 'package:github_app/core/constants/app_routes.dart';
 import 'package:github_app/features/repo/presentation/pages/repo_page.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,7 +11,7 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(5),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -23,9 +23,7 @@ class HomePage extends StatelessWidget {
                   ),
                   Spacer(),
                   IconButton(
-                    onPressed: () {
-                      context.push(Routes.favoriteRepos);
-                    },
+                    onPressed: () => context.goToFavoriteRepos(),
                     icon: Icon(Icons.favorite_outline, size: 28),
                   ),
                 ],

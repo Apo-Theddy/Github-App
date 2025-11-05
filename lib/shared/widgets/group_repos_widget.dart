@@ -6,7 +6,7 @@ import 'package:github_app/features/repo/presentation/widgets/repo_card.dart';
 class GroupReposWidget extends StatelessWidget {
   final List<Repo> repos;
   final ScrollController scrollController;
-  final void Function(int id)? onRemoveFavorite; // callback opcional
+  final void Function(int id)? onRemoveFavorite;
 
   const GroupReposWidget({
     super.key,
@@ -23,7 +23,7 @@ class GroupReposWidget extends StatelessWidget {
         color: Color(AppColor.secondary),
         borderRadius: BorderRadius.circular(10),
       ),
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.symmetric(vertical: 5),
       child: ListView.builder(
         controller: scrollController,
         physics: NeverScrollableScrollPhysics(),
@@ -34,7 +34,7 @@ class GroupReposWidget extends StatelessWidget {
           return RepoCard(
             key: ValueKey(repo.id),
             repo: repo,
-            onRemoveFavorite: onRemoveFavorite, // pasar callback
+            onRemoveFavorite: onRemoveFavorite,
           );
         },
       ),
