@@ -10,9 +10,9 @@ una app para manejar tus repos de github desde el celular sin complicarte la vid
 - buscar repos de cualquier usuario por nombre
 - guardar tus repos favoritos
 - quitar favoritos cuando quieras
-- ver tus favoritos sin internet
-- ver detalles completos: readme, estrellas, forks, issues, pull requests, lenguajes, colaboradores
-- ver perfiles de usuarios: bio, seguidores, seguidos, contribuciones, repos publicos
+- ver tus favoritos
+- ver detalles completos: readme, estrellas, forks, issues, pull requests, lenguajes
+- ver perfiles de usuarios: bio, seguidores, seguidos, repos publicos
 
 ---
 
