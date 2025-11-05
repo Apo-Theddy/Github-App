@@ -1,11 +1,17 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:convert';
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:github_app/core/color/app_color.dart';
 import 'package:github_app/features/repo/data/models/repo_model.dart';
+import 'package:github_app/features/repo/di/container.dart';
 import 'package:github_app/features/repo/presentation/pages/favorite_repos_page.dart';
 import 'package:github_app/features/repo/presentation/pages/repo_detail_page.dart';
 import 'package:github_app/features/repo/presentation/pages/user_detail_page.dart';
 import 'package:github_app/features/splash_screen/presentation/pages/splash_screen_page.dart';
 import 'package:github_app/home_page.dart';
 import 'package:go_router/go_router.dart';
+import 'package:github_app/features/user/data/models/user_model.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -25,9 +31,7 @@ class AppRoutes {
     GoRoute(
       path: splash,
       name: 'splash',
-      builder: (context, state) {
-        return SplashScreenPage();
-      },
+      builder: (context, state) => SplashScreenPage(),
     ),
     GoRoute(
       path: home,
@@ -38,14 +42,16 @@ class AppRoutes {
       path: userDetail,
       name: 'userDetail',
       pageBuilder: (context, state) {
-        final repo = state.extra as Repo?;
-        if (repo == null) {
-          throw ArgumentError('Requires a Repo object for this route');
-        }
+        final extras = state.extra as Map<String, dynamic>?;
+        if (extras == null) throw ArgumentError('Missing data for userDetail');
+
+        final repo = extras['repo'] as Repo;
+        final user = extras['user'] as User;
+        final markdown = extras['markdown'] as String;
 
         return _buildFadePage(
           state: state,
-          child: UserDetailPage(repo: repo),
+          child: UserDetailPage(repo: repo, user: user, markdown: markdown),
         );
       },
     ),
@@ -95,12 +101,49 @@ class AppRoutes {
 }
 
 extension NavigationExtension on BuildContext {
-  void goHome() {
-    go(AppRoutes.home);
-  }
+  void goHome() => go(AppRoutes.home);
 
-  void goToUserDetail(Repo repo) {
-    push(AppRoutes.userDetail, extra: repo);
+  Future<void> goToUserDetail(Repo repo) async {
+    try {
+      final dio = sp<Dio>();
+      final ownerLogin = repo.owner.login;
+
+      final results = await Future.wait([
+        dio.get("/users/$ownerLogin"),
+        dio.get(
+          "/repos/$ownerLogin/$ownerLogin/readme",
+          options: Options(validateStatus: (s) => s == 200 || s == 404),
+        ),
+      ]);
+
+      final userResponse = results[0];
+      final readmeResponse = results[1];
+
+      final user = User.fromJson(userResponse.data);
+      String markdown = "";
+      if (readmeResponse.statusCode == 200 &&
+          readmeResponse.data?["content"] != null) {
+        final base64String = readmeResponse.data["content"] as String;
+        markdown = utf8.decode(
+          base64.decode(base64String.replaceAll('\n', '')),
+        );
+      }
+
+      push(
+        AppRoutes.userDetail,
+        extra: {'repo': repo, 'user': user, 'markdown': markdown},
+      );
+    } on DioException catch (e) {
+      ScaffoldMessenger.of(this).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Failed to load user details: ${e.response?.data?["message"] ?? e.message}',
+            style: const TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Color(AppColor.secondary),
+        ),
+      );
+    }
   }
 
   void goToRepoDetail(Repo repo) {
