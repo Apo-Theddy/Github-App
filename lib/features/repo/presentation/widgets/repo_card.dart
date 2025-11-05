@@ -55,8 +55,10 @@ class _RepoCardState extends State<RepoCard> {
                       placeholder: (context, url) => CircularProgressIndicator(
                         color: Color(AppColor.color1),
                       ),
-                      errorWidget: (context, url, error) =>
-                          Icon(Icons.account_circle, size: 35),
+                      errorWidget: (context, url, error) => Hero(
+                        tag: 'avatar_${widget.repo.id}',
+                        child: Icon(Icons.account_circle, size: 35),
+                      ),
                       width: 35,
                       height: 35,
                     ),

@@ -7,6 +7,7 @@ import 'package:github_app/features/repo/presentation/bloc/favorite_repo_bloc.da
 import 'package:github_app/features/repo/presentation/bloc/favorite_repo_event.dart';
 import 'package:github_app/features/repo/presentation/bloc/favorite_repo_state.dart';
 import 'package:github_app/gen/assets.gen.dart';
+import 'package:github_app/shared/widgets/back_button_widget.dart';
 import 'package:github_app/shared/widgets/group_repos_widget.dart';
 import 'package:github_app/shared/widgets/loading_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -72,12 +73,19 @@ class _FavoriteReposPageState extends State<FavoriteReposPage>
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Favorite Repositories',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              Row(
+                children: [
+                  BackButtonWidget(),
+                  const SizedBox(width: 16),
+                  const Text(
+                    'Favorite Repsitories',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
               SizedBox(height: 10),
               _buildContent(),
