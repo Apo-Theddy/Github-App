@@ -8,6 +8,7 @@ import 'package:github_app/features/repo/presentation/bloc/favorite_repo_bloc.da
 import 'package:github_app/features/repo/presentation/bloc/favorite_repo_event.dart';
 import 'package:github_app/features/repo/presentation/bloc/favorite_repo_state.dart';
 import 'package:github_app/shared/utils/language_color.dart';
+import 'package:github_app/shared/widgets/cached_network_image_widget.dart';
 import 'package:go_router/go_router.dart';
 
 class RepoCard extends StatelessWidget {
@@ -44,23 +45,12 @@ class RepoCard extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: () => context.goToUserDetail(repo),
-                    child: Hero(
-                      tag: 'avatar_${repo.id}',
-                      child: ClipOval(
-                        child: CachedNetworkImage(
-                          imageUrl: repo.owner.avatarUrl,
-                          width: 40,
-                          height: 40,
-                          fit: BoxFit.cover,
-                          placeholder: (_, __) => Container(
-                            color: Colors.grey.shade200,
-                            child: const Icon(Icons.person, color: Colors.grey),
-                          ),
-                          errorWidget: (_, __, ___) => Container(
-                            color: Colors.grey.shade200,
-                            child: const Icon(Icons.person, color: Colors.grey),
-                          ),
-                        ),
+                    child: ClipOval(
+                      child: CachedNetworkImageWidget(
+                        imageUrl: repo.owner.avatarUrl,
+                        width: 40,
+                        height: 40,
+                        fit: BoxFit.cover,
                       ),
                     ),
                   ),
