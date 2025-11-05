@@ -1,60 +1,23 @@
-import 'dart:convert';
-
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:github_app/core/color/app_color.dart';
 import 'package:github_app/features/repo/data/models/owner_model.dart';
-import 'package:github_app/features/repo/di/container.dart';
 import 'package:github_app/features/user/data/models/user_model.dart';
 import 'package:github_app/shared/widgets/cached_network_image_widget.dart';
 
-class ProfileUserCard extends StatefulWidget {
-  const ProfileUserCard({super.key, required this.owner});
+class ProfileUserCard extends StatelessWidget {
   final Owner owner;
+  final User user;
+  final String markdown;
 
-  @override
-  State<ProfileUserCard> createState() => _ProfileUserCardState();
-}
-
-class _ProfileUserCardState extends State<ProfileUserCard> {
-  Future<User> _loadUserDetail() async {
-    try {
-      final response = await sp<Dio>().get("/users/${widget.owner.login}");
-      final data = response.data;
-      return User.fromJson(data);
-    } catch (e) {
-      debugPrint("Error loading user detail: $e");
-      rethrow;
-    }
-  }
-
-  Future<String> _loadMarkdownProfile() async {
-    if (widget.owner.type != "User") return "";
-
-    try {
-      final response = await sp<Dio>().get(
-        "/repos/${widget.owner.login}/${widget.owner.login}/readme",
-        options: Options(
-          validateStatus: (status) => status == 200 || status == 404,
-        ),
-      );
-
-      if (response.statusCode == 404) return "";
-      final data = response.data;
-      if (data == null || data["content"] == null) return "";
-
-      final base64String = data["content"] as String;
-      final cleaned = base64String.replaceAll('\n', '');
-      final bytes = base64.decode(cleaned);
-      return utf8.decode(bytes);
-    } catch (e) {
-      debugPrint("Error loading README: $e");
-      return "";
-    }
-  }
+  const ProfileUserCard({
+    super.key,
+    required this.owner,
+    required this.user,
+    required this.markdown,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +29,7 @@ class _ProfileUserCardState extends State<ProfileUserCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(height: size.height * 0.03),
+
           Stack(
             clipBehavior: Clip.none,
             children: [
@@ -87,86 +51,53 @@ class _ProfileUserCardState extends State<ProfileUserCard> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      widget.owner.login,
+                      owner.login,
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    FutureBuilder(
-                      future: _loadUserDetail(),
-                      builder: (ctx, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Padding(
-                            padding: EdgeInsets.only(top: 8.0),
-                            child: SizedBox(
-                              height: 16,
-                              width: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                          );
-                        }
-
-                        if (snapshot.hasError || !snapshot.hasData) {
-                          return const Padding(
-                            padding: EdgeInsets.only(top: 8.0),
-                            child: Text(
-                              "Failed to load user details.",
-                              style: TextStyle(color: Colors.redAccent),
-                            ),
-                          );
-                        }
-
-                        final user = snapshot.data!;
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(Icons.location_pin, size: 19),
-                                const SizedBox(width: 6),
-                                Text(user.location ?? 'No location provided'),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                FaIcon(FontAwesomeIcons.userGroup, size: 16),
-                                SizedBox(width: 6),
-                                Text(
-                                  "${user.followers}",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                SizedBox(width: 6),
-                                Text(
-                                  "followers",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey.shade400,
-                                  ),
-                                ),
-                                SizedBox(width: 6),
-                                FaIcon(FontAwesomeIcons.user, size: 16),
-                                SizedBox(width: 6),
-                                Text(
-                                  "${user.following}",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                SizedBox(width: 6),
-                                Text(
-                                  "following",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey.shade400,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        );
-                      },
+                    Row(
+                      children: [
+                        const Icon(Icons.location_pin, size: 19),
+                        const SizedBox(width: 6),
+                        Text(user.location ?? 'No location provided'),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const FaIcon(FontAwesomeIcons.userGroup, size: 16),
+                        const SizedBox(width: 6),
+                        Text(
+                          "${user.followers}",
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          "followers",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade400,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        const FaIcon(FontAwesomeIcons.user, size: 16),
+                        const SizedBox(width: 6),
+                        Text(
+                          "${user.following}",
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          "following",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade400,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -184,7 +115,7 @@ class _ProfileUserCardState extends State<ProfileUserCard> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(100),
                     child: CachedNetworkImageWidget(
-                      imageUrl: widget.owner.avatarUrl,
+                      imageUrl: owner.avatarUrl,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -209,7 +140,7 @@ class _ProfileUserCardState extends State<ProfileUserCard> {
                 Row(
                   children: [
                     Text(
-                      widget.owner.login,
+                      owner.login,
                       style: const TextStyle(
                         fontWeight: FontWeight.w500,
                         fontFamily: 'monospace',
@@ -226,81 +157,57 @@ class _ProfileUserCardState extends State<ProfileUserCard> {
                   ],
                 ),
                 const Divider(height: 20, thickness: 0.8),
-
-                FutureBuilder<String>(
-                  future: _loadMarkdownProfile(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const SizedBox(
-                        height: 60,
-                        child: Center(
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                if (markdown.trim().isEmpty)
+                  const Text(
+                    "This user has no README.md profile.",
+                    style: TextStyle(color: Colors.grey),
+                  )
+                else
+                  SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: MarkdownBody(
+                      data: markdown,
+                      shrinkWrap: true,
+                      selectable: true,
+                      styleSheet: MarkdownStyleSheet(
+                        p: const TextStyle(fontSize: 14, height: 1.6),
+                        h1: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
                         ),
-                      );
-                    }
-
-                    if (snapshot.hasError || snapshot.data == null) {
-                      return const Text(
-                        "Failed to load README.md profile.",
-                        style: TextStyle(color: Colors.redAccent),
-                      );
-                    }
-
-                    final markdownContent = snapshot.data!;
-                    if (markdownContent.trim().isEmpty) {
-                      return const Text(
-                        "This user has no README.md profile.",
-                        style: TextStyle(color: Colors.grey),
-                      );
-                    }
-
-                    return SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      child: MarkdownBody(
-                        data: markdownContent,
-                        shrinkWrap: true,
-                        selectable: true,
-                        styleSheet: MarkdownStyleSheet(
-                          p: const TextStyle(fontSize: 14, height: 1.6),
-                          h1: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          h2: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          h3: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          code: TextStyle(
-                            fontFamily: 'monospace',
-                            fontSize: 12,
-                            backgroundColor: Colors.grey[800],
-                          ),
-                          codeblockPadding: const EdgeInsets.all(12),
-                          codeblockDecoration: BoxDecoration(
-                            color: Colors.grey[800],
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          blockquoteDecoration: BoxDecoration(
-                            color: Colors.grey[700],
-                            borderRadius: BorderRadius.circular(4),
-                            border: const Border(
-                              left: BorderSide(color: Colors.blue, width: 4),
-                            ),
-                          ),
-                          blockquotePadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          tableBorder: TableBorder.all(color: Colors.grey),
+                        h2: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
+                        h3: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        code: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 12,
+                          backgroundColor: Colors.grey[800],
+                        ),
+                        codeblockPadding: const EdgeInsets.all(12),
+                        codeblockDecoration: BoxDecoration(
+                          color: Colors.grey[800],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        blockquoteDecoration: BoxDecoration(
+                          color: Colors.grey[700],
+                          borderRadius: BorderRadius.circular(4),
+                          border: const Border(
+                            left: BorderSide(color: Colors.blue, width: 4),
+                          ),
+                        ),
+                        blockquotePadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        tableBorder: TableBorder.all(color: Colors.grey),
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  ),
               ],
             ),
           ),
