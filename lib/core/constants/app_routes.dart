@@ -100,9 +100,13 @@ class AppRoutes {
 }
 
 extension NavigationExtension on BuildContext {
-  void goHome() => go(AppRoutes.home);
+  void goHome() {
+    FocusManager.instance.primaryFocus?.unfocus();
+    go(AppRoutes.home);
+  }
 
   Future<void> goToUserDetail(Repo repo) async {
+    FocusManager.instance.primaryFocus?.unfocus();
     try {
       final dio = sp<Dio>();
       final ownerLogin = repo.owner.login;
@@ -146,10 +150,12 @@ extension NavigationExtension on BuildContext {
   }
 
   void goToRepoDetail(Repo repo) {
+    FocusManager.instance.primaryFocus?.unfocus();
     push(AppRoutes.repoDetail, extra: repo);
   }
 
   void goToFavoriteRepos() {
+    FocusManager.instance.primaryFocus?.unfocus();
     push(AppRoutes.favoriteRepos);
   }
 }
